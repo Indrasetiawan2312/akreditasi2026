@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISPENA SMART CONTROL 2026-2027 - FINAL</title>
+    <title>SISPENA SDN MAJALENGKA WETAN VIII</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-firestore-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,67 +11,97 @@
     <style>
         :root { --navy: #0f172a; --blue: #2563eb; --green: #10b981; --red: #f43f5e; --purple: #8b5cf6; --sky: #0ea5e9; --bg: #f1f5f9; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; }
-        .header { background: var(--navy); color: white; padding: 25px 20px; text-align: center; border-bottom: 5px solid var(--blue); }
-        .container { max-width: 1200px; margin: -30px auto 0; padding: 0 15px; }
         
-        /* Progress Bar */
-        .progress-card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .progress-bg { background: #e2e8f0; height: 25px; border-radius: 20px; overflow: hidden; position: relative; }
-        .progress-fill { background: linear-gradient(to right, var(--blue), var(--green)); height: 100%; width: 0%; transition: 1s ease-in-out; }
-        .progress-text { position: absolute; width: 100%; text-align: center; top: 0; font-weight: bold; font-size: 0.85rem; line-height: 25px; color: #1e293b; }
+        .header { background: var(--navy); color: white; padding: 30px 20px; text-align: center; border-bottom: 5px solid var(--blue); }
+        .running-text { background: rgba(255,255,255,0.1); padding: 5px 0; font-weight: bold; color: #fbbf24; margin-top: 10px; }
 
-        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 25px; }
-        .btn-nav { padding: 15px; border-radius: 12px; color: white; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.85rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border:none; cursor:pointer; }
+        .container { max-width: 1200px; margin: -40px auto 0; padding: 0 15px; }
+
+        /* Profil Sekolah Terupdate */
+        .profile-card { background: white; border-radius: 15px; padding: 25px; display: grid; grid-template-columns: auto 1fr; gap: 25px; align-items: center; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); margin-bottom: 20px; border-left: 8px solid #fbbf24; }
+        .school-logo { width: 80px; height: 80px; background: #f1f5f9; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: var(--navy); border: 2px solid #e2e8f0; }
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; font-size: 0.85rem; margin-top: 10px; }
+        .info-item b { color: var(--blue); display: block; margin-bottom: 2px; text-transform: uppercase; font-size: 0.75rem; }
+        .address-box { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f1f5f9; font-size: 0.8rem; color: #64748b; }
+
+        .progress-card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .progress-bg { background: #e2e8f0; height: 25px; border-radius: 20px; overflow: hidden; position: relative; border: 2px solid #fff; }
+        .progress-fill { background: linear-gradient(to right, var(--blue), var(--green)); height: 100%; width: 0%; transition: 1.5s cubic-bezier(0.1, 0.7, 1.0, 0.1); }
+        .progress-text { position: absolute; width: 100%; text-align: center; top: 0; font-weight: bold; font-size: 0.8rem; line-height: 22px; color: #1e293b; }
+
+        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 25px; }
+        .btn-nav { padding: 15px; border-radius: 12px; color: white; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.8rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border:none; cursor:pointer; transition: 0.3s; }
+        .btn-nav:hover { filter: brightness(1.1); transform: translateY(-2px); }
 
         .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
         .grid-input { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        input, select, textarea { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; box-sizing: border-box; }
-        
+        input, select, textarea { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit; }
         #subCategoryArea { grid-column: span 2; background: #f8fafc; padding: 15px; border-radius: 10px; border: 2px dashed var(--blue); display: none; }
         .btn-save { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; grid-column: span 2; font-size: 1rem; margin-top: 10px; }
 
         .comp-box { background: white; border-radius: 12px; margin-bottom: 25px; overflow-x: auto; border: 1px solid #e2e8f0; }
-        .comp-head { padding: 15px 20px; color: white; font-weight: bold; }
+        .comp-head { padding: 15px 20px; color: white; font-weight: bold; font-size: 0.9rem; }
         .h-1 { background: var(--red); } .h-2 { background: #f59e0b; } .h-3 { background: var(--purple); } .h-4 { background: var(--sky); }
         
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.75rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
-        .badge { background: #e2e8f0; padding: 4px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; color: #475569; }
+        .badge { background: #e2e8f0; padding: 4px 8px; border-radius: 5px; font-size: 0.65rem; font-weight: bold; color: #475569; }
+        
+        marquee { font-size: 1rem; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1><i class="fas fa-chart-line"></i> SISPENA SMART CONTROL 2026</h1>
-    <p>Monitoring & Persentase Digitalisasi Akreditasi</p>
+    <h2 style="margin:0; font-size: 1.6rem; letter-spacing: 1px;">SISPENA SMART CONTROL TAHUN 2026/2027</h2>
+    <div class="running-text">
+        <marquee scrollamount="6">SD NEGERI MAJALENGKA WETAN VIII - KECAMATAN MAJALENGKA - KABUPATEN MAJALENGKA</marquee>
+    </div>
 </div>
 
 <div class="container">
+    <div class="profile-card">
+        <div class="school-logo"><i class="fas fa-school"></i></div>
+        <div>
+            <h3 style="margin:0 0 5px 0; color:var(--navy); font-size: 1.2rem;">Profil Satuan Pendidikan</h3>
+            <div class="info-grid">
+                <div class="info-item"><b>NPSN</b> 20246074</div>
+                <div class="info-item"><b>Akreditasi</b> B (Baik)</div>
+                <div class="info-item"><b>Status</b> Negeri</div>
+                <div class="info-item"><b>Kabupaten</b> Majalengka</div>
+            </div>
+            <div class="address-box">
+                <i class="fas fa-map-marker-alt" style="color:var(--red)"></i> Jalan K.H Abdul Halim Nomor 5 Komplek Neglasari, Kec. Majalengka
+            </div>
+        </div>
+    </div>
+
     <div class="progress-card">
         <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <span style="font-weight:bold; color:var(--navy);"><i class="fas fa-tasks"></i> Progress Pengisian Dokumen</span>
+            <span style="font-weight:bold;"><i class="fas fa-tasks"></i> Kesiapan Instrumen Akreditasi</span>
             <span id="percentLabel" style="font-weight:bold; color:var(--blue);">0%</span>
         </div>
         <div class="progress-bg">
             <div id="progressBar" class="progress-fill"></div>
-            <div class="progress-text">Total Dokumen Terkumpul: <span id="docCount">0</span></div>
+            <div class="progress-text">Total Berkas Terupload: <span id="docCount">0</span> Dokumen</div>
         </div>
     </div>
 
     <div class="nav-grid">
-        <a href="https://raporpendidikan.kemdikbud.go.id/" target="_blank" class="btn-nav" style="background: var(--purple);"><i class="fas fa-file-alt"></i> RAPOR PENDIDIKAN</a>
+        <a href="https://raporpendidikan.kemdikbud.go.id/" target="_blank" class="btn-nav" style="background: var(--purple);"><i class="fas fa-file-invoice"></i> RAPOR PENDIDIKAN</a>
         <a href="https://sp.datadik.kemdikbud.go.id/" target="_blank" class="btn-nav" style="background: var(--sky);"><i class="fas fa-sync"></i> LINK DAPODIK</a>
-        <button onclick="window.print()" class="btn-nav" style="background: var(--red);"><i class="fas fa-print"></i> CETAK REKAP</button>
-        <button onclick="downloadExcel()" class="btn-nav" style="background: var(--green);"><i class="fas fa-file-excel"></i> EXCEL BERFUNGSI</button>
+        <button onclick="window.print()" class="btn-nav" style="background: var(--red);"><i class="fas fa-print"></i> CETAK LAPORAN</button>
+        <button onclick="downloadExcel()" class="btn-nav" style="background: var(--green);"><i class="fas fa-file-excel"></i> EKSPOR EXCEL</button>
     </div>
 
     <div class="card">
+        <h4 style="margin:0 0 15px 0; color:var(--navy);"><i class="fas fa-edit"></i> Input Bukti Kinerja Baru</h4>
         <div class="grid-input">
             <div>
-                <label>1. Pilih Komponen Utama</label>
+                <label style="font-size:0.8rem; font-weight:bold; display:block; margin-bottom:5px;">Pilih Komponen</label>
                 <select id="mainCategory" onchange="updateSubCategories()">
-                    <option value="">-- Pilih Komponen --</option>
+                    <option value="">-- Pilih --</option>
                     <option value="mutu-lulusan">1. Mutu Lulusan</option>
                     <option value="proses-pembelajaran">2. Proses Pembelajaran</option>
                     <option value="mutu-guru">3. Mutu Guru</option>
@@ -79,46 +109,42 @@
                 </select>
             </div>
             <div>
-                <label>2. Nama Dokumen</label>
-                <input type="text" id="docName" placeholder="Contoh: SK Panitia PPDB">
+                <label style="font-size:0.8rem; font-weight:bold; display:block; margin-bottom:5px;">Nama Dokumen</label>
+                <input type="text" id="docName" placeholder="Contoh: SK Pembagian Tugas">
             </div>
-
             <div id="subCategoryArea">
-                <label>3. Pilih Sasaran Butir/Poin</label>
+                <label style="font-size:0.8rem; font-weight:bold; display:block; margin-bottom:5px;">Sasaran Butir/Poin IASP</label>
                 <select id="subCategory"></select>
             </div>
-
-            <input type="text" id="docLink" placeholder="Tempel Link Drive Di Sini" style="grid-column: span 2;">
-            <textarea id="docDesc" rows="2" placeholder="Keterangan Tambahan..."></textarea>
-            <button class="btn-save" onclick="saveData()">UPLOAD & HITUNG PROGRESS</button>
+            <input type="text" id="docLink" placeholder="Tautkan Link Google Drive (Pastikan akses dibuka)" style="grid-column: span 2;">
+            <textarea id="docDesc" rows="2" placeholder="Tulis keterangan atau deskripsi file..."></textarea>
+            <button class="btn-save" onclick="saveData()">PUBLIKASIKAN DOKUMEN</button>
         </div>
     </div>
 
-    <div id="tablesContainer">
-        <div class="comp-box"><div class="comp-head h-1">MUTU LULUSAN</div>
-            <table id="table-mutu"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Link</th></tr></thead><tbody id="body-mutu"></tbody></table>
-        </div>
-        <div class="comp-box"><div class="comp-head h-2">PROSES PEMBELAJARAN</div>
-            <table id="table-proses"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Link</th></tr></thead><tbody id="body-proses"></tbody></table>
-        </div>
-        <div class="comp-box"><div class="comp-head h-3">MUTU GURU</div>
-            <table id="table-guru"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Link</th></tr></thead><tbody id="body-guru"></tbody></table>
-        </div>
-        <div class="comp-box"><div class="comp-head h-4">MANAJEMEN SEKOLAH</div>
-            <table id="table-manaj"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Link</th></tr></thead><tbody id="body-manaj"></tbody></table>
-        </div>
+    <div class="comp-box"><div class="comp-head h-1">I. KOMPONEN MUTU LULUSAN</div>
+        <table id="table-mutu"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Opsi</th></tr></thead><tbody id="body-mutu"></tbody></table>
+    </div>
+    <div class="comp-box"><div class="comp-head h-2">II. KOMPONEN PROSES PEMBELAJARAN</div>
+        <table id="table-proses"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Opsi</th></tr></thead><tbody id="body-proses"></tbody></table>
+    </div>
+    <div class="comp-box"><div class="comp-head h-3">III. KOMPONEN MUTU GURU</div>
+        <table id="table-guru"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Opsi</th></tr></thead><tbody id="body-guru"></tbody></table>
+    </div>
+    <div class="comp-box"><div class="comp-head h-4">IV. KOMPONEN MANAJEMEN SEKOLAH</div>
+        <table id="table-manaj"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Opsi</th></tr></thead><tbody id="body-manaj"></tbody></table>
     </div>
 </div>
 
 <script>
     const subData = {
-        "mutu-lulusan": ["Kedisiplinan", "Perilaku Religius", "Karya Siswa", "Prestasi"],
-        "proses-pembelajaran": ["RPP/Modul", "Penilaian", "Sarpras Lab", "Ekskul"],
-        "mutu-guru": ["Sertifikat", "Inovasi", "Supervisi", "Karya Tulis"],
-        "manajemen-sekolah": ["RKAS/Visi", "Sarpras", "MoU", "Komite"]
+        "mutu-lulusan": ["Butir 1: Kedisiplinan", "Butir 2: Karakter Religius", "Butir 3: Karya Siswa", "Butir 4: Prestasi"],
+        "proses-pembelajaran": ["Butir 5: RPP/Modul", "Butir 6: Asesmen", "Butir 7: Sarpras Belajar", "Butir 8: Ekstrakurikuler"],
+        "mutu-guru": ["Butir 9: Kompetensi Guru", "Butir 10: Inovasi Ajar", "Butir 11: Supervisi", "Butir 12: Karya Ilmiah"],
+        "manajemen-sekolah": ["Butir 13: Visi Misi", "Butir 14: Pengelolaan", "Butir 15: Kemitraan", "Butir 16: Komite"]
     };
 
-    const TARGET_DOKUMEN = 100; // Ubah angka ini sesuai target total dokumen sekolah Anda
+    const TARGET_DOKUMEN = 100;
 
     function updateSubCategories() {
         const main = document.getElementById('mainCategory').value;
@@ -153,13 +179,13 @@
                 kategori: main, sub: sub, nama: name, url: link, keterangan: desc,
                 waktu: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                alert("Berhasil!");
+                alert("Data berhasil tersimpan!");
                 location.reload();
             });
-        } else { alert("Lengkapi data!"); }
+        } else { alert("Mohon lengkapi Komponen, Nama, dan Link!"); }
     }
 
-    db.collection("dokumen").onSnapshot((snapshot) => {
+    db.collection("dokumen").orderBy("waktu", "desc").onSnapshot((snapshot) => {
         const count = snapshot.size;
         const percent = Math.min((count / TARGET_DOKUMEN) * 100, 100).toFixed(1);
         
@@ -171,35 +197,27 @@
         snapshot.forEach((doc) => {
             const data = doc.data();
             const row = `<tr>
-                <td><strong>${data.nama}</strong></td>
+                <td><b>${data.nama}</b></td>
                 <td><span class="badge">${data.sub}</span></td>
-                <td>${data.keterangan || '-'}</td>
-                <td><a href="${data.url}" target="_blank" style="color:var(--blue); font-weight:bold;">Buka</a></td>
+                <td style="color:#64748b; font-size:0.75rem">${data.keterangan || '-'}</td>
+                <td><a href="${data.url}" target="_blank" style="color:var(--blue); font-weight:bold; text-decoration:none;"><i class="fas fa-link"></i> Buka</a></td>
             </tr>`;
             if(document.getElementById('body-'+data.kategori)) document.getElementById('body-'+data.kategori).innerHTML += row;
         });
     });
 
-    // PERBAIKAN FUNGSI EXCEL
     function downloadExcel() {
         const wb = XLSX.utils.book_new();
-        const cats = [
-            {id: 'table-mutu', name: 'Mutu Lulusan'},
-            {id: 'table-proses', name: 'Proses Pembelajaran'},
-            {id: 'table-guru', name: 'Mutu Guru'},
-            {id: 'table-manaj', name: 'Manajemen Sekolah'}
-        ];
-        
-        cats.forEach(cat => {
-            const table = document.getElementById(cat.id);
+        const cats = [{id:'table-mutu', n:'Mutu Lulusan'}, {id:'table-proses', n:'Proses Belajar'}, {id:'table-guru', n:'Mutu Guru'}, {id:'table-manaj', n:'Manajemen'}];
+        cats.forEach(c => {
+            const table = document.getElementById(c.id);
             if(table) {
                 const ws = XLSX.utils.table_to_sheet(table);
-                XLSX.utils.book_append_sheet(wb, ws, cat.name);
+                XLSX.utils.book_append_sheet(wb, ws, c.n);
             }
         });
-        XLSX.writeFile(wb, "REKAP_SISPENA_2026.xlsx");
+        XLSX.writeFile(wb, "REKAP_SISPENA_SDN_MW8.xlsx");
     }
 </script>
 </body>
 </html>
-
