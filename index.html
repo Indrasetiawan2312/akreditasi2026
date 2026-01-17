@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISPENA CONTROL 2026-2027 - TEPAT SASARAN</title>
+    <title>SISPENA SMART CONTROL 2026 - FINAL</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-firestore-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -14,17 +14,20 @@
         .header { background: var(--navy); color: white; padding: 25px 20px; text-align: center; border-bottom: 5px solid var(--blue); }
         .container { max-width: 1200px; margin: -30px auto 0; padding: 0 15px; }
         
+        /* Progress Bar */
+        .progress-card { background: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .progress-bg { background: #e2e8f0; height: 25px; border-radius: 20px; overflow: hidden; position: relative; }
+        .progress-fill { background: linear-gradient(to right, var(--blue), var(--green)); height: 100%; width: 0%; transition: 1s ease-in-out; }
+        .progress-text { position: absolute; width: 100%; text-align: center; top: 0; font-weight: bold; font-size: 0.85rem; line-height: 25px; color: #1e293b; }
+
         .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 25px; }
         .btn-nav { padding: 15px; border-radius: 12px; color: white; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.85rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border:none; cursor:pointer; }
 
         .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
         .grid-input { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        input, select, textarea { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 14px; }
+        input, select, textarea { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; box-sizing: border-box; }
         
-        /* Highlight Sub-Pilihan */
         #subCategoryArea { grid-column: span 2; background: #f8fafc; padding: 15px; border-radius: 10px; border: 2px dashed var(--blue); display: none; }
-        label { font-weight: bold; font-size: 0.85rem; color: var(--navy); margin-bottom: 5px; display: block; }
-
         .btn-save { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; grid-column: span 2; font-size: 1rem; margin-top: 10px; }
 
         .comp-box { background: white; border-radius: 12px; margin-bottom: 25px; overflow-x: auto; border: 1px solid #e2e8f0; }
@@ -33,26 +36,37 @@
         
         table { width: 100%; border-collapse: collapse; min-width: 800px; }
         th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.75rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-        .badge { background: #e2e8f0; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; color: #475569; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+        .badge { background: #e2e8f0; padding: 4px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; color: #475569; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1><i class="fas fa-bullseye"></i> SISPENA SMART CONTROL 2026</h1>
-    <p>Upload Dokumen Tepat Sasaran Berdasarkan Butir IASP</p>
+    <h1><i class="fas fa-chart-line"></i> SISPENA SMART CONTROL 2026</h1>
+    <p>Monitoring & Persentase Digitalisasi Akreditasi</p>
 </div>
 
 <div class="container">
-    <div class="nav-grid no-print">
-        <a href="https://drive.google.com/drive/folders/1ImgDhkgaA3OrG6rNUUpTOMAMNcdG1xBZ?usp=sharing" target="_blank" class="btn-nav" style="background: var(--purple);"><i class="fas fa-folder-open"></i> DRIVE UTAMA</a>
-        <a href="https://sp.datadik.kemdikbud.go.id/" target="_blank" class="btn-nav" style="background: var(--sky);"><i class="fas fa-sync"></i> DAPODIK</a>
-        <button onclick="window.print()" class="btn-nav" style="background: var(--red);"><i class="fas fa-print"></i> CETAK REKAP</button>
-        <button onclick="downloadExcel()" class="btn-nav" style="background: var(--green);"><i class="fas fa-file-excel"></i> EXCEL</button>
+    <div class="progress-card">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <span style="font-weight:bold; color:var(--navy);"><i class="fas fa-tasks"></i> Progress Pengisian Dokumen</span>
+            <span id="percentLabel" style="font-weight:bold; color:var(--blue);">0%</span>
+        </div>
+        <div class="progress-bg">
+            <div id="progressBar" class="progress-fill"></div>
+            <div class="progress-text">Total Dokumen Terkumpul: <span id="docCount">0</span></div>
+        </div>
     </div>
 
-    <div class="card no-print">
+    <div class="nav-grid">
+        <a href="https://raporpendidikan.kemdikbud.go.id/" target="_blank" class="btn-nav" style="background: var(--purple);"><i class="fas fa-file-alt"></i> RAPOR PENDIDIKAN</a>
+        <a href="https://sp.datadik.kemdikbud.go.id/" target="_blank" class="btn-nav" style="background: var(--sky);"><i class="fas fa-sync"></i> LINK DAPODIK</a>
+        <button onclick="window.print()" class="btn-nav" style="background: var(--red);"><i class="fas fa-print"></i> CETAK REKAP</button>
+        <button onclick="downloadExcel()" class="btn-nav" style="background: var(--green);"><i class="fas fa-file-excel"></i> EXCEL BERFUNGSI</button>
+    </div>
+
+    <div class="card">
         <div class="grid-input">
             <div>
                 <label>1. Pilih Komponen Utama</label>
@@ -66,17 +80,17 @@
             </div>
             <div>
                 <label>2. Nama Dokumen</label>
-                <input type="text" id="docName" placeholder="Contoh: Tata Tertib Siswa">
+                <input type="text" id="docName" placeholder="Contoh: SK Panitia PPDB">
             </div>
 
             <div id="subCategoryArea">
-                <label id="subLabel">3. Pilih Sasaran Butir/Poin</label>
+                <label>3. Pilih Sasaran Butir/Poin</label>
                 <select id="subCategory"></select>
             </div>
 
-            <input type="text" id="docLink" placeholder="Tempel Link Google Drive Di Sini" style="grid-column: span 2;">
-            <textarea id="docDesc" rows="2" placeholder="Keterangan Tambahan (Opsional)"></textarea>
-            <button class="btn-save" onclick="saveData()">PUBLIKASIKAN DOKUMEN</button>
+            <input type="text" id="docLink" placeholder="Tempel Link Drive Di Sini" style="grid-column: span 2;">
+            <textarea id="docDesc" rows="2" placeholder="Keterangan Tambahan..."></textarea>
+            <button class="btn-save" onclick="saveData()">UPLOAD & HITUNG PROGRESS</button>
         </div>
     </div>
 
@@ -98,23 +112,22 @@
 
 <script>
     const subData = {
-        "mutu-lulusan": ["Kedisiplinan & Tata Tertib", "Perilaku Religius", "Karya & Portofolio Siswa", "Prestasi Akademik/Non-Akademik"],
-        "proses-pembelajaran": ["RPP / Modul Ajar", "Perangkat Penilaian", "Pemanfaatan Sarpras & Lab", "Kegiatan Ekstrakurikuler"],
-        "mutu-guru": ["Sertifikat Pengembangan Diri", "Inovasi & Media Pembelajaran", "Laporan Supervisi Akademik", "Karya Tulis / PTK Guru"],
-        "manajemen-sekolah": ["Visi, Misi & RKAS", "Pengelolaan Sarpras", "Kerjasama / MoU Instansi", "Dokumen Komite & Masyarakat"]
+        "mutu-lulusan": ["Kedisiplinan", "Perilaku Religius", "Karya Siswa", "Prestasi"],
+        "proses-pembelajaran": ["RPP/Modul", "Penilaian", "Sarpras Lab", "Ekskul"],
+        "mutu-guru": ["Sertifikat", "Inovasi", "Supervisi", "Karya Tulis"],
+        "manajemen-sekolah": ["RKAS/Visi", "Sarpras", "MoU", "Komite"]
     };
+
+    const TARGET_DOKUMEN = 100; // Ubah angka ini sesuai target total dokumen sekolah Anda
 
     function updateSubCategories() {
         const main = document.getElementById('mainCategory').value;
         const area = document.getElementById('subCategoryArea');
         const subSelect = document.getElementById('subCategory');
-        
-        if (main && subData[main]) {
+        if (main) {
             area.style.display = 'block';
             subSelect.innerHTML = subData[main].map(item => `<option value="${item}">${item}</option>`).join('');
-        } else {
-            area.style.display = 'none';
-        }
+        } else { area.style.display = 'none'; }
     }
 
     const firebaseConfig = {
@@ -140,36 +153,52 @@
                 kategori: main, sub: sub, nama: name, url: link, keterangan: desc,
                 waktu: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                alert("Berhasil! Tersimpan di Sasaran: " + sub);
+                alert("Berhasil!");
                 location.reload();
             });
-        } else { alert("Mohon lengkapi Komponen, Nama, dan Link!"); }
+        } else { alert("Lengkapi data!"); }
     }
 
-    db.collection("dokumen").orderBy("waktu", "desc").onSnapshot((snapshot) => {
+    db.collection("dokumen").onSnapshot((snapshot) => {
+        const count = snapshot.size;
+        const percent = Math.min((count / TARGET_DOKUMEN) * 100, 100).toFixed(1);
+        
+        document.getElementById('docCount').innerText = count;
+        document.getElementById('percentLabel').innerText = percent + "%";
+        document.getElementById('progressBar').style.width = percent + "%";
+
         ['mutu-lulusan', 'proses-pembelajaran', 'mutu-guru', 'manajemen-sekolah'].forEach(c => document.getElementById('body-'+c).innerHTML = "");
         snapshot.forEach((doc) => {
             const data = doc.data();
             const row = `<tr>
                 <td><strong>${data.nama}</strong></td>
                 <td><span class="badge">${data.sub}</span></td>
-                <td style="color:#64748b; font-size:0.8rem">${data.keterangan || '-'}</td>
-                <td><a href="${data.url}" target="_blank" style="color:var(--blue); font-weight:bold; text-decoration:none;">Buka File</a></td>
+                <td>${data.keterangan || '-'}</td>
+                <td><a href="${data.url}" target="_blank" style="color:var(--blue); font-weight:bold;">Buka</a></td>
             </tr>`;
             if(document.getElementById('body-'+data.kategori)) document.getElementById('body-'+data.kategori).innerHTML += row;
         });
     });
 
+    // PERBAIKAN FUNGSI EXCEL
     function downloadExcel() {
         const wb = XLSX.utils.book_new();
-        ['mutu-lulusan', 'proses-pembelajaran', 'mutu-guru', 'manajemen-sekolah'].forEach(t => {
-            const el = document.getElementById('table-'+t);
-            const ws = XLSX.utils.table_to_sheet(el);
-            XLSX.utils.book_append_sheet(wb, ws, t);
+        const cats = [
+            {id: 'table-mutu', name: 'Mutu Lulusan'},
+            {id: 'table-proses', name: 'Proses Pembelajaran'},
+            {id: 'table-guru', name: 'Mutu Guru'},
+            {id: 'table-manaj', name: 'Manajemen Sekolah'}
+        ];
+        
+        cats.forEach(cat => {
+            const table = document.getElementById(cat.id);
+            if(table) {
+                const ws = XLSX.utils.table_to_sheet(table);
+                XLSX.utils.book_append_sheet(wb, ws, cat.name);
+            }
         });
-        XLSX.writeFile(wb, "REKAP_TEPAT_SASARAN_2026.xlsx");
+        XLSX.writeFile(wb, "REKAP_SISPENA_2026.xlsx");
     }
 </script>
 </body>
 </html>
-
