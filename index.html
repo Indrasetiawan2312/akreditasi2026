@@ -3,194 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISPENA 2026 - Digital Control</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-slate-50 min-h-screen font-sans">
-
-    <div class="bg-gradient-to-r from-blue-900 to-indigo-800 text-white p-8 shadow-xl border-b-4 border-yellow-500">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
-            <div class="text-center md:text-left">
-                <h1 class="text-4xl font-black tracking-tighter uppercase italic">SISPENA CONTROL 2026</h1>
-                <p class="text-blue-200 mt-1 font-medium">Sistem Terintegrasi Persiapan Akreditasi & Observasi Sekolah</p>
-            </div>
-            <div class="mt-4 md:mt-0 flex gap-4">
-                <button onclick="downloadCSV()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-2 rounded-full font-bold shadow-lg transition flex items-center gap-2 text-sm">
-                    📊 DOWNLOAD REKAP EXCEL
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="max-w-6xl mx-auto py-8 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <title>SISPENA CONTROL 2026 - DIGITALISASI AKREDITASI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-firestore-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root { --primary: #2563eb; --secondary: #64748b; --success: #22c55e; --rapor: #8b5cf6; --dapodik: #0ea5e9; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; margin: 0; padding: 15px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        h2 { color: #1e293b; text-align: center; margin-bottom: 5px; font-size: 1.5rem; }
+        .header-desc { text-align: center; color: #64748b; margin-bottom: 20px; font-size: 0.85em; }
         
-        <div class="lg:col-span-1 space-y-6">
-            <div class="bg-white p-6 rounded-2xl shadow-xl border border-gray-100">
-                <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                    <span class="bg-blue-100 p-2 rounded-lg text-blue-600">📝</span> Input Data SISPENA
-                </h2>
-                <div class="space-y-4">
-                    <input type="text" id="docName" placeholder="Nama Dokumen (Contoh: RKT 2026)" class="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500 transition">
-                    <select id="category" class="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500">
-                        <option value="1. Kurikulum (KOSP)">1. Kurikulum (KOSP)</option>
-                        <option value="2. RKT/RKAS">2. Perencanaan (RKT/RKAS)</option>
-                        <option value="3. Modul Ajar/RPP">3. Pembelajaran (Modul Ajar)</option>
-                        <option value="4. Supervisi Akademik">4. Supervisi Akademik</option>
-                        <option value="5. Tata Tertib">5. Tata Tertib & Ekskul</option>
-                        <option value="6. Pelatihan Guru">6. Sertifikat/Pelatihan Guru</option>
-                        <option value="7. Sarpras">7. Inventaris Sarpras</option>
-                        <option value="8. Video Profil">8. Video Profil Sekolah</option>
-                    </select>
-                    <input type="url" id="driveLink" placeholder="Paste Link Google Drive" class="w-full border-2 border-gray-100 p-3 rounded-xl outline-none focus:border-blue-500">
-                    <button onclick="saveData()" id="btnSave" class="w-full bg-blue-600 text-white font-black py-4 rounded-xl hover:bg-blue-700 shadow-lg transition-all">SIMPAN DOKUMEN</button>
-                </div>
-            </div>
+        /* Panel Tombol Navigasi */
+        .nav-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 25px; }
+        .nav-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 10px; color: white; text-decoration: none; font-weight: bold; font-size: 0.85em; transition: 0.3s; border: none; cursor: pointer; text-align: center; }
+        .nav-btn:hover { transform: translateY(-3px); opacity: 0.9; }
+        .bg-rapor { background: var(--rapor); }
+        .bg-dapodik { background: var(--dapodik); }
+        .bg-excel { background: var(--success); }
+        
+        /* Form Styling */
+        .form-section { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; }
+        .full-width { grid-column: span 2; }
+        .btn-save { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; font-size: 15px; }
+        
+        /* Table Styling */
+        .table-container { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #f1f5f9; padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        .tag { padding: 3px 7px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .tag-mutu { background: #dcfce7; color: #166534; }
+        .tag-proses { background: #dbeafe; color: #1e40af; }
+        .tag-guru { background: #fef9c3; color: #854d0e; }
+        .tag-manaj { background: #fee2e2; color: #991b1b; }
 
-            <div class="bg-white p-6 rounded-2xl shadow-lg border-l-4 border-yellow-500">
-                <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                    🔍 Cek Fisik (Observasi Asesor)
-                </h3>
-                <div class="space-y-3 text-sm text-gray-600" id="checklist">
-                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600"> Pojok Baca & Perpus Rapi</label>
-                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600"> Sanitasi/Toilet Bersih & Air Lancar</label>
-                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600"> Papan Mading/Anti-Bullying</label>
-                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600"> Alat Peraga & Media di Kelas</label>
-                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600"> Kotak P3K & Jalur Evakuasi</label>
-                </div>
-            </div>
-        </div>
+        @media (max-width: 600px) { .grid-inputs { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
+    </style>
+</head>
+<body>
 
-        <div class="lg:col-span-2 space-y-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
-                <div class="bg-gradient-to-br from-emerald-600 to-teal-500 p-6 rounded-2xl shadow-lg">
-                    <p class="text-xs font-bold uppercase opacity-80">Rapor Pendidikan (ANBK)</p>
-                    <h4 class="text-2xl font-black mt-1">STATUS: TERKENDALI</h4>
-                    <p class="text-[10px] mt-4 leading-tight italic">Pastikan nilai indikator Literasi & Numerasi tidak berwarna Merah di Dashboard Kemdikbud.</p>
-                </div>
-                <div class="bg-gradient-to-br from-amber-500 to-orange-500 p-6 rounded-2xl shadow-lg">
-                    <p class="text-xs font-bold uppercase opacity-80">Persiapan SDM (Wawancara)</p>
-                    <h4 class="text-2xl font-black mt-1">SIMULASI: SIAP</h4>
-                    <p class="text-[10px] mt-4 leading-tight italic">Kepsek, Guru, Siswa, dan Komite sudah diberikan pembekalan materi wawancara.</p>
-                </div>
-            </div>
+<div class="container">
+    <h2><i class="fas fa-database"></i> SISPENA CONTROL 2026</h2>
+    <p class="header-desc">Monitoring Dokumen & Sinkronisasi Data Pendidikan</p>
 
-            <div class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100">
-                <div class="p-6 border-b flex flex-col md:flex-row justify-between items-center bg-gray-50 gap-4">
-                    <h2 class="font-black text-gray-800 uppercase italic">Dokumen Cloud Tersimpan</h2>
-                    <div class="relative w-full md:w-64">
-                        <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Cari dokumen..." class="w-full border pl-10 pr-4 py-2 rounded-full text-sm outline-none focus:ring-2 focus:ring-blue-400 shadow-inner">
-                        <span class="absolute left-3 top-2.5">🔍</span>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left" id="mainTable">
-                        <thead class="bg-gray-800 text-white text-[10px] uppercase font-bold tracking-widest">
-                            <tr>
-                                <th class="p-4">Informasi Dokumen</th>
-                                <th class="p-4 text-center">Aksi Manajemen</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody" class="divide-y divide-gray-100">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
+    <div class="nav-panel">
+        <a href="TEMPEL_LINK_DRIVE_RAPOR_DISINI" target="_blank" class="nav-btn bg-rapor">
+            <i class="fas fa-file-contract"></i> RAPOR PENDIDIKAN
+        </a>
+        <a href="https://sp.datadik.kemdikbud.go.id/" target="_blank" class="nav-btn bg-dapodik">
+            <i class="fas fa-sync-alt"></i> UPDATE DAPODIK
+        </a>
+        <button onclick="downloadExcel()" class="nav-btn bg-excel">
+            <i class="fas fa-file-excel"></i> REKAP EXCEL
+        </button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+    <div class="form-section">
+        <div class="grid-inputs">
+            <input type="text" id="docName" placeholder="Nama Dokumen (Contoh: RPP / Ijazah)">
+            <select id="docCategory">
+                <option value="Mutu Lulusan">Mutu Lulusan</option>
+                <option value="Proses Pembelajaran">Proses Pembelajaran</option>
+                <option value="Mutu Guru">Mutu Guru</option>
+                <option value="Manajemen Sekolah">Manajemen Sekolah</option>
+            </select>
+            <input type="text" id="docLink" placeholder="Link Google Drive File" class="full-width">
+        </div>
+        <button class="btn-save" onclick="saveData()"><i class="fas fa-cloud-upload-alt"></i> SIMPAN KE CLOUD</button>
+    </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCC0pF2ronNrUJt-klglHoeqja4CCZItIQ",
-            authDomain: "akreditasi2026-40211.firebaseapp.com",
-            projectId: "akreditasi2026-40211",
-            storageBucket: "akreditasi2026-40211.firebasestorage.app",
-            messagingSenderId: "1043836638601",
-            appId: "1:1043836638601:web:fc319620b9d412933efd58"
-        };
+    <div class="table-container">
+        <table id="docTable">
+            <thead>
+                <tr>
+                    <th>Dokumen</th>
+                    <th>Kategori</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        let allData = []; // Untuk penampung download CSV
+<script>
+    // KONFIGURASI FIREBASE (Sudah Terkoneksi)
+    const firebaseConfig = {
+        apiKey: "AIzaSyC...", 
+        authDomain: "akreditasi2026-6b216.firebaseapp.com",
+        projectId: "akreditasi2026-6b216",
+        storageBucket: "akreditasi2026-6b216.appspot.com",
+        messagingSenderId: "367375252876",
+        appId: "1:367375252876:web:6e1b736798835f8664104d"
+    };
 
-        // SIMPAN DATA
-        window.saveData = async function() {
-            const name = document.getElementById('docName').value;
-            const cat = document.getElementById('category').value;
-            const link = document.getElementById('driveLink').value;
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-            if (!name || !link) return alert("Error: Nama & Link Wajib diisi!");
+    function saveData() {
+        const name = document.getElementById('docName').value;
+        const category = document.getElementById('docCategory').value;
+        const link = document.getElementById('docLink').value;
 
-            try {
-                await addDoc(collection(db, "sispena_final_2026"), {
-                    nama: name, kategori: cat, url: link, waktu: new Date()
-                });
+        if(name && link) {
+            db.collection("dokumen").add({
+                nama: name, kategori: category, url: link,
+                waktu: firebase.firestore.FieldValue.serverTimestamp()
+            }).then(() => {
+                alert("Berhasil! Data tersinkron ke Cloud.");
                 document.getElementById('docName').value = "";
-                document.getElementById('driveLink').value = "";
-                alert("Berhasil! Dokumen tersimpan.");
-            } catch (e) { alert("Gagal Simpan: " + e.message); }
-        }
-
-        // HAPUS DATA
-        window.hapusData = async function(id) {
-            if(confirm("Hapus dokumen ini secara permanen?")) {
-                await deleteDoc(doc(db, "sispena_final_2026", id));
-            }
-        }
-
-        // TAMPILKAN REALTIME
-        const q = query(collection(db, "sispena_final_2026"), orderBy("waktu", "desc"));
-        onSnapshot(q, (snapshot) => {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = "";
-            allData = [];
-
-            snapshot.forEach((doc) => {
-                const data = doc.data();
-                allData.push(data); // Simpan untuk CSV
-                tableBody.innerHTML += `
-                    <tr class="hover:bg-blue-50 transition border-b">
-                        <td class="p-4">
-                            <span class="block font-black text-gray-800 text-base uppercase">${data.nama}</span>
-                            <span class="text-[10px] bg-blue-100 text-blue-600 px-3 py-1 rounded-full font-bold">${data.kategori}</span>
-                        </td>
-                        <td class="p-4 text-center">
-                            <div class="flex justify-center gap-2">
-                                <a href="${data.url}" target="_blank" class="bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-black px-5 py-2 rounded-lg shadow-md transition">BUKA LINK DRIVE</a>
-                                <button onclick="hapusData('${doc.id}')" class="bg-red-50 hover:bg-red-100 text-red-500 p-2 rounded-lg border border-red-100">🗑️</button>
-                            </div>
-                        </td>
-                    </tr>`;
+                document.getElementById('docLink').value = "";
             });
+        } else {
+            alert("Nama dan Link wajib diisi!");
+        }
+    }
+
+    db.collection("dokumen").orderBy("waktu", "desc").onSnapshot((snapshot) => {
+        const tableBody = document.getElementById('tableBody');
+        tableBody.innerHTML = "";
+        snapshot.forEach((doc) => {
+            const data = doc.data();
+            let tag = data.kategori === "Proses Pembelajaran" ? "tag-proses" : 
+                      data.kategori === "Mutu Guru" ? "tag-guru" : 
+                      data.kategori === "Manajemen Sekolah" ? "tag-manaj" : "tag-mutu";
+
+            tableBody.innerHTML += `
+                <tr>
+                    <td><strong>${data.nama}</strong></td>
+                    <td><span class="tag ${tag}">${data.kategori}</span></td>
+                    <td><a href="${data.url}" target="_blank" style="color:#2563eb; text-decoration:none;"><i class="fas fa-eye"></i> Buka</a></td>
+                </tr>
+            `;
         });
+    });
 
-        // SEARCH
-        window.searchTable = function() {
-            let input = document.getElementById("searchInput").value.toUpperCase();
-            let tr = document.getElementById("tableBody").getElementsByTagName("tr");
-            for (let i = 0; i < tr.length; i++) {
-                let text = tr[i].innerText.toUpperCase();
-                tr[i].style.display = text.indexOf(input) > -1 ? "" : "none";
-            }
-        }
-
-        // DOWNLOAD CSV (EXCEL)
-        window.downloadCSV = function() {
-            if (allData.length === 0) return alert("Data kosong!");
-            let csvContent = "data:text/csv;charset=utf-8,Nama Dokumen,Kategori,Link\n";
-            allData.forEach(row => {
-                csvContent += `${row.nama},${row.kategori},${row.url}\n`;
-            });
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", "REKAP_DOKUMEN_SISPENA_2026.csv");
-            document.body.appendChild(link);
-            link.click();
-        }
-    </script>
+    function downloadExcel() {
+        const table = document.getElementById("docTable");
+        const wb = XLSX.utils.table_to_book(table, {sheet: "REKAP"});
+        XLSX.writeFile(wb, "Data_Akreditasi_Dapodik_2026.xlsx");
+    }
+</script>
 </body>
 </html>
