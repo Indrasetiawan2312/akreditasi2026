@@ -3,135 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISPENA SMART 2026 - Digital Dashboard</title>
+    <title>SISPENA CONTROL 2026 - TEPAT SASARAN</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-firestore-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --navy: #0f172a; --blue: #2563eb; --green: #10b981; --red: #f43f5e; --bg: #f8fafc; }
+        :root { --navy: #0f172a; --blue: #2563eb; --green: #10b981; --red: #f43f5e; --purple: #8b5cf6; --sky: #0ea5e9; --bg: #f1f5f9; }
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; }
-        .header { background: var(--navy); color: white; padding: 25px 20px; text-align: center; border-bottom: 4px solid var(--blue); }
-        .container { max-width: 1100px; margin: -20px auto 0; padding: 0 15px; }
+        .header { background: var(--navy); color: white; padding: 25px 20px; text-align: center; border-bottom: 5px solid var(--blue); }
+        .container { max-width: 1200px; margin: -30px auto 0; padding: 0 15px; }
         
-        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 25px; }
-        .grid-input { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; box-sizing: border-box; }
-        .btn-save { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; grid-column: span 2; margin-top: 10px; }
-        
-        .action-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
-        .btn-action { padding: 12px 20px; border-radius: 8px; text-decoration: none; font-weight: bold; border: none; cursor: pointer; color: white; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
-        .btn-action:hover { transform: translateY(-2px); opacity: 0.9; }
-        .bg-excel { background: var(--green); }
-        .bg-print { background: var(--red); }
+        .nav-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-bottom: 25px; }
+        .btn-nav { padding: 15px; border-radius: 12px; color: white; font-weight: bold; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 0.85rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border:none; cursor:pointer; }
 
-        .component-box { background: white; border-radius: 12px; margin-bottom: 30px; overflow: hidden; border: 1px solid #e2e8f0; }
-        .comp-header { padding: 15px 20px; color: white; font-weight: bold; font-size: 1rem; }
-        .h-mutu { background: #ef4444; } .h-proses { background: #f59e0b; } .h-guru { background: #8b5cf6; } .h-manaj { background: #0ea5e9; }
+        .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        .grid-input { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        input, select, textarea { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; box-sizing: border-box; font-size: 14px; }
         
-        table { width: 100%; border-collapse: collapse; }
-        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.8rem; border-bottom: 1px solid #e2e8f0; color: #64748b; }
+        /* Highlight Sub-Pilihan */
+        #subCategoryArea { grid-column: span 2; background: #f8fafc; padding: 15px; border-radius: 10px; border: 2px dashed var(--blue); display: none; }
+        label { font-weight: bold; font-size: 0.85rem; color: var(--navy); margin-bottom: 5px; display: block; }
+
+        .btn-save { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 8px; font-weight: bold; cursor: pointer; grid-column: span 2; font-size: 1rem; margin-top: 10px; }
+
+        .comp-box { background: white; border-radius: 12px; margin-bottom: 25px; overflow-x: auto; border: 1px solid #e2e8f0; }
+        .comp-head { padding: 15px 20px; color: white; font-weight: bold; }
+        .h-1 { background: var(--red); } .h-2 { background: #f59e0b; } .h-3 { background: var(--purple); } .h-4 { background: var(--sky); }
+        
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.75rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
         td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
-        .btn-view { color: var(--blue); text-decoration: none; font-weight: bold; }
-
-        /* Modal Panduan */
-        #guideModal { display: none; position: fixed; z-index: 999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); overflow: auto; padding: 20px; box-sizing: border-box; }
-        .modal-content { background: white; margin: 20px auto; padding: 30px; max-width: 800px; border-radius: 15px; position: relative; }
-        .guide-text h3 { border-bottom: 2px solid #eee; padding-bottom: 5px; margin-top: 20px; }
-        .guide-text ul { padding-left: 20px; }
-        .guide-text li { margin-bottom: 5px; color: #444; }
-
-        @media (max-width: 600px) { .grid-input { grid-template-columns: 1fr; } .btn-save { grid-column: span 1; } }
-        @media print { .no-print { display: none !important; } #guideModal { position: absolute; background: white; } }
+        .badge { background: #e2e8f0; padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; color: #475569; }
     </style>
 </head>
 <body>
 
 <div class="header">
-    <h1 style="margin:0;"><i class="fas fa-layer-group"></i> DASHBOARD SISPENA 2026</h1>
-    <p style="opacity: 0.8;">Manajemen & Kendali Persiapan Akreditasi Sekolah</p>
+    <h1><i class="fas fa-bullseye"></i> SISPENA SMART CONTROL 2026</h1>
+    <p>Upload Dokumen Tepat Sasaran Berdasarkan Butir IASP</p>
 </div>
 
 <div class="container">
-    <div class="card">
-        <h3 style="margin-top:0"><i class="fas fa-plus-circle"></i> Input Link Dokumen</h3>
+    <div class="nav-grid no-print">
+        <a href="https://drive.google.com/drive/folders/1ImgDhkgaA3OrG6rNUUpTOMAMNcdG1xBZ?usp=sharing" target="_blank" class="btn-nav" style="background: var(--purple);"><i class="fas fa-folder-open"></i> DRIVE UTAMA</a>
+        <a href="https://sp.datadik.kemdikbud.go.id/" target="_blank" class="btn-nav" style="background: var(--sky);"><i class="fas fa-sync"></i> DAPODIK</a>
+        <button onclick="window.print()" class="btn-nav" style="background: var(--red);"><i class="fas fa-print"></i> CETAK REKAP</button>
+        <button onclick="downloadExcel()" class="btn-nav" style="background: var(--green);"><i class="fas fa-file-excel"></i> EXCEL</button>
+    </div>
+
+    <div class="card no-print">
         <div class="grid-input">
-            <input type="text" id="docName" placeholder="Nama Dokumen (Cth: SK Pembagian Tugas)">
-            <select id="docCategory">
-                <option value="mutu-lulusan">1. Mutu Lulusan</option>
-                <option value="proses-pembelajaran">2. Proses Pembelajaran</option>
-                <option value="mutu-guru">3. Mutu Guru</option>
-                <option value="manajemen-sekolah">4. Manajemen Sekolah</option>
-            </select>
-            <input type="text" id="docLink" placeholder="Paste Link Google Drive" style="grid-column: span 2;">
-            <button class="btn-save" onclick="saveData()"><i class="fas fa-save"></i> SIMPAN DOKUMEN</button>
+            <div>
+                <label>1. Pilih Komponen Utama</label>
+                <select id="mainCategory" onchange="updateSubCategories()">
+                    <option value="">-- Pilih Komponen --</option>
+                    <option value="mutu-lulusan">1. Mutu Lulusan</option>
+                    <option value="proses-pembelajaran">2. Proses Pembelajaran</option>
+                    <option value="mutu-guru">3. Mutu Guru</option>
+                    <option value="manajemen-sekolah">4. Manajemen Sekolah</option>
+                </select>
+            </div>
+            <div>
+                <label>2. Nama Dokumen</label>
+                <input type="text" id="docName" placeholder="Contoh: Tata Tertib Siswa">
+            </div>
+
+            <div id="subCategoryArea">
+                <label id="subLabel">3. Pilih Sasaran Butir/Poin</label>
+                <select id="subCategory"></select>
+            </div>
+
+            <input type="text" id="docLink" placeholder="Tempel Link Google Drive Di Sini" style="grid-column: span 2;">
+            <textarea id="docDesc" rows="2" placeholder="Keterangan Tambahan (Opsional)"></textarea>
+            <button class="btn-save" onclick="saveData()">PUBLIKASIKAN DOKUMEN</button>
         </div>
     </div>
 
-    <div class="action-bar">
-        <button onclick="downloadExcel()" class="btn-action bg-excel"><i class="fas fa-file-excel"></i> DOWNLOAD REKAP EXCEL</button>
-        <button onclick="openGuide()" class="btn-action bg-print"><i class="fas fa-file-pdf"></i> PANDUAN & CHECKLIST</button>
-    </div>
-
-    <div class="component-box"><div class="comp-header h-mutu">MUTU LULUSAN</div>
-        <table id="table-mutu"><thead><tr><th>Nama Dokumen</th><th>Aksi</th></tr></thead><tbody id="body-mutu"></tbody></table>
-    </div>
-    <div class="component-box"><div class="comp-header h-proses">PROSES PEMBELAJARAN</div>
-        <table id="table-proses"><thead><tr><th>Nama Dokumen</th><th>Aksi</th></tr></thead><tbody id="body-proses"></tbody></table>
-    </div>
-    <div class="component-box"><div class="comp-header h-guru">MUTU GURU</div>
-        <table id="table-guru"><thead><tr><th>Nama Dokumen</th><th>Aksi</th></tr></thead><tbody id="body-guru"></tbody></table>
-    </div>
-    <div class="component-box"><div class="comp-header h-manaj">MANAJEMEN SEKOLAH</div>
-        <table id="table-manaj"><thead><tr><th>Nama Dokumen</th><th>Aksi</th></tr></thead><tbody id="body-manaj"></tbody></table>
-    </div>
-</div>
-
-<div id="guideModal">
-    <div class="modal-content" id="printableGuide">
-        <span onclick="closeGuide()" class="no-print" style="position:absolute; right:20px; top:20px; cursor:pointer; font-weight:bold; color:red;">[ TUTUP ]</span>
-        <h2 style="text-align:center; color:var(--navy); margin-bottom:0;">CHECKLIST DOKUMEN AKREDITASI 2026</h2>
-        <p style="text-align:center; color:#666; font-size:0.9rem;">Berdasarkan Instrumen IASP Terbaru</p>
-        <hr>
-        <div class="guide-text">
-            <h3 style="color:#ef4444;">1. MUTU LULUSAN</h3>
-            <ul>
-                <li>Dokumen Kedisiplinan (Tata tertib, Buku Piket, Catatan terlambat)</li>
-                <li>Perilaku Religius (Foto ibadah bersama, Perayaan hari besar)</li>
-                <li>Tugas/Karya Siswa (Portofolio, Laporan Praktik, P5)</li>
-                <li>Prestasi Siswa (Sertifikat lomba akademik/non-akademik)</li>
-            </ul>
-            <h3 style="color:#f59e0b;">2. PROSES PEMBELAJARAN</h3>
-            <ul>
-                <li>Perangkat Ajar (RPP/Modul Ajar yang kreatif & lengkap)</li>
-                <li>Penilaian (Kisi-kisi, Soal, Analisis Nilai, Remedial)</li>
-                <li>Pemanfaatan Sarpras (Foto penggunaan Lab, Perpustakaan, Internet)</li>
-                <li>Ekstrakurikuler (Program kerja, Daftar hadir, Foto kegiatan)</li>
-            </ul>
-            <h3 style="color:#8b5cf6;">3. MUTU GURU</h3>
-            <ul>
-                <li>Pengembangan Diri (Sertifikat Diklat, Webinar, KKG/MGMP)</li>
-                <li>Inovasi Mengajar (Foto/Video media pembelajaran kreatif)</li>
-                <li>Supervisi Akademik (Hasil supervisi oleh Kepala Sekolah)</li>
-                <li>Refleksi Guru (Dokumen catatan perbaikan mengajar)</li>
-            </ul>
-            <h3 style="color:#0ea5e9;">4. MANAJEMEN SEKOLAH</h3>
-            <ul>
-                <li>Dokumen Utama (Visi-Misi, RKAS, Kalender Pendidikan)</li>
-                <li>Rapor Pendidikan (Analisis & Tindak Lanjut PBD)</li>
-                <li>Kemitraan (MoU dengan Puskesmas, Polisi, Industri, dll)</li>
-                <li>Komite Sekolah (Notulen rapat & kerjasama orang tua)</li>
-            </ul>
+    <div id="tablesContainer">
+        <div class="comp-box"><div class="comp-head h-1">MUTU LULUSAN</div>
+            <table id="table-mutu"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Link</th></tr></thead><tbody id="body-mutu"></tbody></table>
         </div>
-        <div class="action-bar no-print" style="margin-top:30px;">
-            <button onclick="window.print()" class="btn-action bg-print"><i class="fas fa-print"></i> CETAK / SIMPAN PDF</button>
+        <div class="comp-box"><div class="comp-head h-2">PROSES PEMBELAJARAN</div>
+            <table id="table-proses"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Link</th></tr></thead><tbody id="body-proses"></tbody></table>
+        </div>
+        <div class="comp-box"><div class="comp-head h-3">MUTU GURU</div>
+            <table id="table-guru"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Link</th></tr></thead><tbody id="body-guru"></tbody></table>
+        </div>
+        <div class="comp-box"><div class="comp-head h-4">MANAJEMEN SEKOLAH</div>
+            <table id="table-manaj"><thead><tr><th>Nama Dokumen</th><th>Sasaran Butir</th><th>Keterangan</th><th>Link</th></tr></thead><tbody id="body-manaj"></tbody></table>
         </div>
     </div>
 </div>
 
 <script>
-    // FIREBASE CONFIGURATION
+    const subData = {
+        "mutu-lulusan": ["Kedisiplinan & Tata Tertib", "Perilaku Religius", "Karya & Portofolio Siswa", "Prestasi Akademik/Non-Akademik"],
+        "proses-pembelajaran": ["RPP / Modul Ajar", "Perangkat Penilaian", "Pemanfaatan Sarpras & Lab", "Kegiatan Ekstrakurikuler"],
+        "mutu-guru": ["Sertifikat Pengembangan Diri", "Inovasi & Media Pembelajaran", "Laporan Supervisi Akademik", "Karya Tulis / PTK Guru"],
+        "manajemen-sekolah": ["Visi, Misi & RKAS", "Pengelolaan Sarpras", "Kerjasama / MoU Instansi", "Dokumen Komite & Masyarakat"]
+    };
+
+    function updateSubCategories() {
+        const main = document.getElementById('mainCategory').value;
+        const area = document.getElementById('subCategoryArea');
+        const subSelect = document.getElementById('subCategory');
+        
+        if (main && subData[main]) {
+            area.style.display = 'block';
+            subSelect.innerHTML = subData[main].map(item => `<option value="${item}">${item}</option>`).join('');
+        } else {
+            area.style.display = 'none';
+        }
+    }
+
     const firebaseConfig = {
         apiKey: "AIzaSyC...", 
         authDomain: "akreditasi2026-6b216.firebaseapp.com",
@@ -144,41 +129,46 @@
     const db = firebase.firestore();
 
     function saveData() {
+        const main = document.getElementById('mainCategory').value;
+        const sub = document.getElementById('subCategory').value;
         const name = document.getElementById('docName').value;
-        const cat = document.getElementById('docCategory').value;
         const link = document.getElementById('docLink').value;
-        if(name && link) {
+        const desc = document.getElementById('docDesc').value;
+
+        if(main && name && link) {
             db.collection("dokumen").add({
-                nama: name, kategori: cat, url: link,
+                kategori: main, sub: sub, nama: name, url: link, keterangan: desc,
                 waktu: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => { 
-                alert("Data berhasil tersimpan!"); 
-                document.getElementById('docName').value=""; 
-                document.getElementById('docLink').value=""; 
+            }).then(() => {
+                alert("Berhasil! Tersimpan di Sasaran: " + sub);
+                location.reload();
             });
-        }
+        } else { alert("Mohon lengkapi Komponen, Nama, dan Link!"); }
     }
 
     db.collection("dokumen").orderBy("waktu", "desc").onSnapshot((snapshot) => {
         ['mutu-lulusan', 'proses-pembelajaran', 'mutu-guru', 'manajemen-sekolah'].forEach(c => document.getElementById('body-'+c).innerHTML = "");
         snapshot.forEach((doc) => {
             const data = doc.data();
-            const row = `<tr><td><strong>${data.nama}</strong></td><td><a href="${data.url}" target="_blank" class="btn-view">Buka Link</a></td></tr>`;
-            document.getElementById('body-'+data.kategori).innerHTML += row;
+            const row = `<tr>
+                <td><strong>${data.nama}</strong></td>
+                <td><span class="badge">${data.sub}</span></td>
+                <td style="color:#64748b; font-size:0.8rem">${data.keterangan || '-'}</td>
+                <td><a href="${data.url}" target="_blank" style="color:var(--blue); font-weight:bold; text-decoration:none;">Buka File</a></td>
+            </tr>`;
+            if(document.getElementById('body-'+data.kategori)) document.getElementById('body-'+data.kategori).innerHTML += row;
         });
     });
 
     function downloadExcel() {
         const wb = XLSX.utils.book_new();
         ['mutu-lulusan', 'proses-pembelajaran', 'mutu-guru', 'manajemen-sekolah'].forEach(t => {
-            const ws = XLSX.utils.table_to_sheet(document.getElementById('table-'+t));
+            const el = document.getElementById('table-'+t);
+            const ws = XLSX.utils.table_to_sheet(el);
             XLSX.utils.book_append_sheet(wb, ws, t);
         });
-        XLSX.writeFile(wb, "REKAP_AKREDITASI_2026.xlsx");
+        XLSX.writeFile(wb, "REKAP_TEPAT_SASARAN_2026.xlsx");
     }
-
-    function openGuide() { document.getElementById('guideModal').style.display = 'block'; }
-    function closeGuide() { document.getElementById('guideModal').style.display = 'none'; }
 </script>
 </body>
 </html>
