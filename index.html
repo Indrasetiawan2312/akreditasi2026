@@ -3,95 +3,100 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SISPENA CONTROL 2026 - DIGITALISASI AKREDITASI</title>
+    <title>Dashboard Akreditasi 4 Komponen</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-app-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.15.0/firebase-firestore-compat.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #2563eb; --secondary: #64748b; --success: #22c55e; --rapor: #8b5cf6; --dapodik: #0ea5e9; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f1f5f9; margin: 0; padding: 15px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
-        h2 { color: #1e293b; text-align: center; margin-bottom: 5px; font-size: 1.5rem; }
-        .header-desc { text-align: center; color: #64748b; margin-bottom: 20px; font-size: 0.85em; }
+        :root { --navy: #0f172a; --blue: #2563eb; --green: #10b981; --bg: #f8fafc; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding-bottom: 50px; }
+        .header { background: var(--navy); color: white; padding: 30px 20px; text-align: center; }
+        .container { max-width: 1100px; margin: -20px auto 0; padding: 0 15px; }
         
-        /* Panel Tombol Navigasi */
-        .nav-panel { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 25px; }
-        .nav-btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 12px; border-radius: 10px; color: white; text-decoration: none; font-weight: bold; font-size: 0.85em; transition: 0.3s; border: none; cursor: pointer; text-align: center; }
-        .nav-btn:hover { transform: translateY(-3px); opacity: 0.9; }
-        .bg-rapor { background: var(--rapor); }
-        .bg-dapodik { background: var(--dapodik); }
-        .bg-excel { background: var(--success); }
-        
-        /* Form Styling */
-        .form-section { background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
-        .grid-inputs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; width: 100%; box-sizing: border-box; }
-        .full-width { grid-column: span 2; }
-        .btn-save { background: var(--primary); color: white; border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; font-size: 15px; }
-        
-        /* Table Styling */
-        .table-container { overflow-x: auto; margin-top: 10px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th { background: #f1f5f9; padding: 12px; text-align: left; border-bottom: 2px solid #e2e8f0; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
-        .tag { padding: 3px 7px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-        .tag-mutu { background: #dcfce7; color: #166534; }
-        .tag-proses { background: #dbeafe; color: #1e40af; }
-        .tag-guru { background: #fef9c3; color: #854d0e; }
-        .tag-manaj { background: #fee2e2; color: #991b1b; }
+        /* Input Section */
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        .grid-input { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        input, select { padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; box-sizing: border-box; }
+        .btn-save { background: var(--blue); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; grid-column: span 2; margin-top: 10px; }
+        .btn-excel { background: var(--green); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; display: inline-block; margin-bottom: 20px; font-weight: bold; border: none; cursor: pointer; }
 
-        @media (max-width: 600px) { .grid-inputs { grid-template-columns: 1fr; } .full-width { grid-column: span 1; } }
+        /* Komponen Sections */
+        .component-box { background: white; border-radius: 12px; margin-bottom: 30px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .comp-header { padding: 15px 20px; color: white; font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .h-mutu { background: #ef4444; } /* Merah */
+        .h-proses { background: #f59e0b; } /* Oranye */
+        .h-guru { background: #8b5cf6; } /* Ungu */
+        .h-manaj { background: #0ea5e9; } /* Biru Muda */
+        
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #f8fafc; padding: 12px; text-align: left; font-size: 0.8rem; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; font-size: 0.9rem; }
+        .btn-open { color: var(--blue); text-decoration: none; font-weight: bold; }
+        
+        @media (max-width: 600px) { .grid-input { grid-template-columns: 1fr; } .btn-save { grid-column: span 1; } }
     </style>
 </head>
 <body>
 
+<div class="header">
+    <h1 style="margin:0;"><i class="fas fa-file-signature"></i> DASHBOARD SISPENA 2026</h1>
+    <p style="opacity: 0.8;">Manajemen Dokumen Berdasarkan 4 Komponen IASP</p>
+</div>
+
 <div class="container">
-    <h2><i class="fas fa-database"></i> SISPENA CONTROL 2026</h2>
-    <p class="header-desc">Monitoring Dokumen & Sinkronisasi Data Pendidikan</p>
-
-    <div class="nav-panel">
-        <a href="TEMPEL_LINK_DRIVE_RAPOR_DISINI" target="_blank" class="nav-btn bg-rapor">
-            <i class="fas fa-file-contract"></i> RAPOR PENDIDIKAN
-        </a>
-        <a href="https://sp.datadik.kemdikbud.go.id/" target="_blank" class="nav-btn bg-dapodik">
-            <i class="fas fa-sync-alt"></i> UPDATE DAPODIK
-        </a>
-        <button onclick="downloadExcel()" class="nav-btn bg-excel">
-            <i class="fas fa-file-excel"></i> REKAP EXCEL
-        </button>
-    </div>
-
-    <div class="form-section">
-        <div class="grid-inputs">
-            <input type="text" id="docName" placeholder="Nama Dokumen (Contoh: RPP / Ijazah)">
+    <div class="card">
+        <h3 style="margin-top:0"><i class="fas fa-plus-circle"></i> Input Dokumen Baru</h3>
+        <div class="grid-input">
+            <input type="text" id="docName" placeholder="Nama Dokumen (Contoh: RPP / KOSP / SK)">
             <select id="docCategory">
-                <option value="Mutu Lulusan">Mutu Lulusan</option>
-                <option value="Proses Pembelajaran">Proses Pembelajaran</option>
-                <option value="Mutu Guru">Mutu Guru</option>
-                <option value="Manajemen Sekolah">Manajemen Sekolah</option>
+                <option value="mutu-lulusan">1. Mutu Lulusan</option>
+                <option value="proses-pembelajaran">2. Proses Pembelajaran</option>
+                <option value="mutu-guru">3. Mutu Guru</option>
+                <option value="manajemen-sekolah">4. Manajemen Sekolah</option>
             </select>
-            <input type="text" id="docLink" placeholder="Link Google Drive File" class="full-width">
+            <input type="text" id="docLink" placeholder="Tempel Link Google Drive Di Sini" style="grid-column: span 2;">
+            <button class="btn-save" onclick="saveData()">SIMPAN KE DATABASE</button>
         </div>
-        <button class="btn-save" onclick="saveData()"><i class="fas fa-cloud-upload-alt"></i> SIMPAN KE CLOUD</button>
     </div>
 
-    <div class="table-container">
-        <table id="docTable">
-            <thead>
-                <tr>
-                    <th>Dokumen</th>
-                    <th>Kategori</th>
-                    <th>Aksi</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
+    <button onclick="downloadExcel()" class="btn-excel"><i class="fas fa-download"></i> DOWNLOAD SEMUA REKAP EXCEL</button>
+
+    <div class="component-box">
+        <div class="comp-header h-mutu"><i class="fas fa-graduation-cap"></i> KOMPONEN 1: MUTU LULUSAN</div>
+        <table id="table-mutu">
+            <thead><tr><th>Nama Dokumen</th><th>Link File</th></tr></thead>
+            <tbody id="body-mutu"></tbody>
+        </table>
+    </div>
+
+    <div class="component-box">
+        <div class="comp-header h-proses"><i class="fas fa-chalkboard-teacher"></i> KOMPONEN 2: PROSES PEMBELAJARAN</div>
+        <table id="table-proses">
+            <thead><tr><th>Nama Dokumen</th><th>Link File</th></tr></thead>
+            <tbody id="body-proses"></tbody>
+        </table>
+    </div>
+
+    <div class="component-box">
+        <div class="comp-header h-guru"><i class="fas fa-user-tie"></i> KOMPONEN 3: MUTU GURU</div>
+        <table id="table-guru">
+            <thead><tr><th>Nama Dokumen</th><th>Link File</th></tr></thead>
+            <tbody id="body-guru"></tbody>
+        </table>
+    </div>
+
+    <div class="component-box">
+        <div class="comp-header h-manaj"><i class="fas fa-school"></i> KOMPONEN 4: MANAJEMEN SEKOLAH</div>
+        <table id="table-manaj">
+            <thead><tr><th>Nama Dokumen</th><th>Link File</th></tr></thead>
+            <tbody id="body-manaj"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    // KONFIGURASI FIREBASE (Sudah Terkoneksi)
+    // KONFIGURASI FIREBASE (Gunakan punya Anda)
     const firebaseConfig = {
         apiKey: "AIzaSyC...", 
         authDomain: "akreditasi2026-6b216.firebaseapp.com",
@@ -106,46 +111,47 @@
 
     function saveData() {
         const name = document.getElementById('docName').value;
-        const category = document.getElementById('docCategory').value;
+        const cat = document.getElementById('docCategory').value;
         const link = document.getElementById('docLink').value;
 
         if(name && link) {
             db.collection("dokumen").add({
-                nama: name, kategori: category, url: link,
+                nama: name, kategori: cat, url: link,
                 waktu: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                alert("Berhasil! Data tersinkron ke Cloud.");
+                alert("Berhasil disimpan ke Komponen " + cat);
                 document.getElementById('docName').value = "";
                 document.getElementById('docLink').value = "";
             });
-        } else {
-            alert("Nama dan Link wajib diisi!");
         }
     }
 
+    // Refresh Data Otomatis & Pisahkan ke Tabel
     db.collection("dokumen").orderBy("waktu", "desc").onSnapshot((snapshot) => {
-        const tableBody = document.getElementById('tableBody');
-        tableBody.innerHTML = "";
+        const categories = ['mutu-lulusan', 'proses-pembelajaran', 'mutu-guru', 'manajemen-sekolah'];
+        categories.forEach(c => document.getElementById('body-' + c).innerHTML = "");
+
         snapshot.forEach((doc) => {
             const data = doc.data();
-            let tag = data.kategori === "Proses Pembelajaran" ? "tag-proses" : 
-                      data.kategori === "Mutu Guru" ? "tag-guru" : 
-                      data.kategori === "Manajemen Sekolah" ? "tag-manaj" : "tag-mutu";
-
-            tableBody.innerHTML += `
-                <tr>
-                    <td><strong>${data.nama}</strong></td>
-                    <td><span class="tag ${tag}">${data.kategori}</span></td>
-                    <td><a href="${data.url}" target="_blank" style="color:#2563eb; text-decoration:none;"><i class="fas fa-eye"></i> Buka</a></td>
-                </tr>
-            `;
+            const row = `<tr><td><strong>${data.nama}</strong></td><td><a href="${data.url}" target="_blank" class="btn-open"><i class="fas fa-external-link-alt"></i> Buka File</a></td></tr>`;
+            
+            const targetBody = document.getElementById('body-' + data.kategori);
+            if(targetBody) targetBody.innerHTML += row;
         });
     });
 
     function downloadExcel() {
-        const table = document.getElementById("docTable");
-        const wb = XLSX.utils.table_to_book(table, {sheet: "REKAP"});
-        XLSX.writeFile(wb, "Data_Akreditasi_Dapodik_2026.xlsx");
+        // Gabungkan semua tabel untuk didownload
+        const wb = XLSX.utils.book_new();
+        const tables = ['mutu-lulusan', 'proses-pembelajaran', 'mutu-guru', 'manajemen-sekolah'];
+        
+        tables.forEach(t => {
+            const el = document.getElementById('table-' + t);
+            const ws = XLSX.utils.table_to_sheet(el);
+            XLSX.utils.book_append_sheet(wb, ws, t.substring(0, 30));
+        });
+        
+        XLSX.writeFile(wb, "REKAP_SISPENA_2026.xlsx");
     }
 </script>
 </body>
